@@ -1,20 +1,23 @@
 package io.agora.media;
 
+/**
+ * Builds advanced RTC and RTM tokens for Agora sessions with fine-grained privilege control.
+ * This class generates tokens for authentication in Agora's real-time communication and messaging services,
+ * supporting multiple privileges with individual expiration timestamps.
+ */
 public class RtcTokenBuilder2 {
     public enum Role {
         /**
          * RECOMMENDED. Use this role for a voice/video call or a live broadcast, if
-         * your scenario does not require authentication for
-         * [Co-host](https://docs.agora.io/en/video-calling/get-started/authentication-workflow?#co-host-token-authentication).
+         * your scenario does not require authentication for co-hosts.
          */
         ROLE_PUBLISHER(1),
         /**
-         * Only use this role if your scenario require authentication for
-         * [Co-host](https://docs.agora.io/en/video-calling/get-started/authentication-workflow?#co-host-token-authentication).
+         * Only use this role if your scenario requires authentication for co-hosts.
+         * Contact Agora support to enable authentication for co-hosting, otherwise
+         * Role_Subscriber has the same privileges as Role_Publisher.
          *
-         * @note In order for this role to take effect, please contact our support team
-         * to enable authentication for Hosting-in for you. Otherwise, Role_Subscriber
-         * still has the same privileges as Role_Publisher.
+         * @see <a href="https://docs.agora.io/en/video-calling/get-started/authentication-workflow?#co-host-token-authentication">Agora Co-host Token Authentication</a>
          */
         ROLE_SUBSCRIBER(2),;
 
@@ -26,45 +29,48 @@ public class RtcTokenBuilder2 {
     }
 
     /**
-     * Build the RTC token with uid.
+     * Builds an RTC token using an integer UID.
      *
-     * @param appId:            The App ID issued to you by Agora. Apply for a new App ID from
-     *                          Agora Dashboard if it is missing from your kit. See Get an App ID.
-     * @param appCertificate:   Certificate of the application that you registered in
-     *                          the Agora Dashboard. See Get an App Certificate.
-     * @param channelName:      Unique channel name for the AgoraRTC session in the string format
-     * @param uid:              User ID. A 32-bit unsigned integer with a value ranging from 1 to (2^32-1).
-     *                          uid must be unique.
-     * @param role:             ROLE_PUBLISHER: A broadcaster/host in a live-broadcast profile.
-     *                          ROLE_SUBSCRIBER: An audience(default) in a live-broadcast profile.
-     * @param tokenExpire:      represented by the number of seconds elapsed since now. If, for example,
-     *                          you want to access the Agora Service within 10 minutes after the token is generated,
-     *                          set tokenExpire as 600(seconds).
-     * @param privilegeExpire: represented by the number of seconds elapsed since now. If, for example,
-     *                          you want to enable your privilege for 10 minutes, set privilegeExpire as 600(seconds).
-     * @return The RTC token.
+     * @param appId The App ID issued by Agora. Apply for a new App ID from the Agora Dashboard if missing.
+     * @param appCertificate Certificate of the application registered in the Agora Dashboard.
+     * @param channelName Unique channel name for the Agora RTC session in string format. The string length must be less than 64 bytes. Supported characters include:
+     *                    <ul>
+     *                    <li>All lowercase English letters: a to z.</li>
+     *                    <li>All uppercase English letters: A to Z.</li>
+     *                    <li>All numeric characters: 0 to 9.</li>
+     *                    <li>The space character.</li>
+     *                    <li>!, #, $, %, &amp;, (, ), +, -, :, ;, &lt;, =, ., &gt;, ?, @, [, ], ^, _, {, }, |, ~, ,</li>
+     *                    </ul>
+     * @param uid User ID. A 32-bit unsigned integer ranging from 1 to (2^32-1). Must be unique. Set to 0 for dynamic UID assignment.
+     * @param role ROLE_PUBLISHER: A broadcaster/host in a live-broadcast profile.
+     *             ROLE_SUBSCRIBER: An audience (default) in a live-broadcast profile.
+     * @param tokenExpire The token expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @param privilegeExpire The privilege expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @return The RTC token, or an empty string if an error occurs.
      */
     public String buildTokenWithUid(String appId, String appCertificate, String channelName, int uid, Role role, int tokenExpire, int privilegeExpire) {
         return buildTokenWithUserAccount(appId, appCertificate, channelName, AccessToken2.getUidStr(uid), role, tokenExpire, privilegeExpire);
     }
 
     /**
-     * Build the RTC token with account.
+     * Builds an RTC token using a user account.
      *
-     * @param appId:            The App ID issued to you by Agora. Apply for a new App ID from
-     *                          Agora Dashboard if it is missing from your kit. See Get an App ID.
-     * @param appCertificate:   Certificate of the application that you registered in
-     *                          the Agora Dashboard. See Get an App Certificate.
-     * @param channelName:      Unique channel name for the AgoraRTC session in the string format
-     * @param account:          The user's account, max length is 255 Bytes.
-     * @param role:             ROLE_PUBLISHER: A broadcaster/host in a live-broadcast profile.
-     *                          ROLE_SUBSCRIBER: An audience(default) in a live-broadcast profile.
-     * @param tokenExpire:      represented by the number of seconds elapsed since now. If, for example,
-     *                          you want to access the Agora Service within 10 minutes after the token is generated,
-     *                          set tokenExpire as 600(seconds).
-     * @param privilegeExpire:  represented by the number of seconds elapsed since now. If, for example,
-     *                          you want to enable your privilege for 10 minutes, set privilegeExpire as 600(seconds).
-     * @return The RTC token.
+     * @param appId The App ID issued by Agora. Apply for a new App ID from the Agora Dashboard if missing.
+     * @param appCertificate Certificate of the application registered in the Agora Dashboard.
+     * @param channelName Unique channel name for the Agora RTC session in string format. The string length must be less than 64 bytes. Supported characters include:
+     *                    <ul>
+     *                    <li>All lowercase English letters: a to z.</li>
+     *                    <li>All uppercase English letters: A to Z.</li>
+     *                    <li>All numeric characters: 0 to 9.</li>
+     *                    <li>The space character.</li>
+     *                    <li>!, #, $, %, &amp;, (, ), +, -, :, ;, &lt;, =, ., &gt;, ?, @, [, ], ^, _, {, }, |, ~, ,</li>
+     *                    </ul>
+     * @param account The user account, max length 255 bytes.
+     * @param role ROLE_PUBLISHER: A broadcaster/host in a live-broadcast profile.
+     *             ROLE_SUBSCRIBER: An audience (default) in a live-broadcast profile.
+     * @param tokenExpire The token expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @param privilegeExpire The privilege expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @return The RTC token, or an empty string if an error occurs.
      */
     public String buildTokenWithUserAccount(String appId, String appCertificate, String channelName, String account, Role role, int tokenExpire,
             int privilegeExpire) {
@@ -88,7 +94,7 @@ public class RtcTokenBuilder2 {
     }
 
     /**
-     * Generates an RTC token with the specified privilege.
+     * Generates an RTC token with specified privileges.
      * <p>
      * This method supports generating a token with the following privileges:
      * - Joining an RTC channel.
@@ -96,41 +102,33 @@ public class RtcTokenBuilder2 {
      * - Publishing video in an RTC channel.
      * - Publishing data streams in an RTC channel.
      * <p>
-     * The privileges for publishing audio, video, and data streams in an RTC channel apply only if you have
-     * enabled co-host authentication.
+     * The privileges for publishing audio, video, and data streams apply only if co-host authentication is enabled.
+     * A user can have multiple privileges, each valid for up to 24 hours. The SDK triggers onTokenPrivilegeWillExpire
+     * and onRequestToken callbacks when the token is about to expire or has expired. Maintain privilege timestamps
+     * in your app logic, as callbacks do not specify the affected privilege. Generate a new token and call renewToken
+     * or joinChannel to continue.
      * <p>
-     * A user can have multiple privileges. Each privilege is valid for a maximum of 24 hours.
-     * The SDK triggers the onTokenPrivilegeWillExpire and onRequestToken callbacks when the token is about to expire
-     * or has expired. The callbacks do not report the specific privilege affected, and you need to maintain
-     * the respective timestamp for each privilege in your app logic. After receiving the callback, you need
-     * to generate a new token, and then call renewToken to pass the new token to the SDK, or call joinChannel to re-join
-     * the channel.
+     * Ensure privilege timestamps are set reasonably. For example, if the join channel privilege expires before
+     * the publish audio privilege, the user is kicked off the channel and cannot publish audio, even if the audio
+     * privilege is still valid.
      *
-     * @note Agora recommends setting a reasonable timestamp for each privilege according to your scenario.
-     * Suppose the expiration timestamp for joining the channel is set earlier than that for publishing audio.
-     * When the token for joining the channel expires, the user is immediately kicked off the RTC channel
-     * and cannot publish any audio stream, even though the timestamp for publishing audio has not expired.
-     *
-     * @param appId                        The App ID of your Agora project.
-     * @param appCertificate               The App Certificate of your Agora project.
-     * @param channelName                  The unique channel name for the Agora RTC session in string format. The string length must be less than 64 bytes. The channel name may contain the following characters:
-     *                                     - All lowercase English letters: a to z.
-     *                                     - All uppercase English letters: A to Z.
-     *                                     - All numeric characters: 0 to 9.
-     *                                     - The space character.
-     *                                     - "!", "#", "$", "%", "&", "(", ")", "+", "-", ":", ";", "<", "=", ".", ">", "?", "@", "[", "]", "^", "_", " {", "}", "|", "~", ",".
-     * @param uid                          The user ID. A 32-bit unsigned integer with a value range from 1 to (2^32 - 1). It must be unique. Set uid as 0, if you do not want to authenticate the user ID, that is, any uid from the app client can join the channel.
-     * @param tokenExpire                  represented by the number of seconds elapsed since now. If, for example, you want to access the
-     *                                     Agora Service within 10 minutes after the token is generated, set tokenExpire as 600(seconds).
-     * @param joinChannelPrivilegeExpire   represented by the number of seconds elapsed since now.
-     *                                     If, for example, you want to join channel and expect stay in the channel for 10 minutes, set joinChannelPrivilegeExpire as 600(seconds).
-     * @param pubAudioPrivilegeExpire      represented by the number of seconds elapsed since now.
-     *                                     If, for example, you want to enable publish audio privilege for 10 minutes, set pubAudioPrivilegeExpire as 600(seconds).
-     * @param pubVideoPrivilegeExpire      represented by the number of seconds elapsed since now.
-     *                                     If, for example, you want to enable publish video privilege for 10 minutes, set pubVideoPrivilegeExpire as 600(seconds).
-     * @param pubDataStreamPrivilegeExpire represented by the number of seconds elapsed since now.
-     *                                     If, for example, you want to enable publish data stream privilege for 10 minutes, set pubDataStreamPrivilegeExpire as 600(seconds).
-     * @return The RTC token.
+     * @param appId The App ID of your Agora project.
+     * @param appCertificate The App Certificate of your Agora project.
+     * @param channelName The unique channel name for the Agora RTC session in string format. The string length must be less than 64 bytes. Supported characters include:
+     *                    <ul>
+     *                    <li>All lowercase English letters: a to z.</li>
+     *                    <li>All uppercase English letters: A to Z.</li>
+     *                    <li>All numeric characters: 0 to 9.</li>
+     *                    <li>The space character.</li>
+     *                    <li>!, #, $, %, &amp;, (, ), +, -, :, ;, &lt;, =, ., &gt;, ?, @, [, ], ^, _, {, }, |, ~, ,</li>
+     *                    </ul>
+     * @param uid The user ID. A 32-bit unsigned integer ranging from 1 to (2^32-1). Must be unique. Set to 0 to skip UID authentication.
+     * @param tokenExpire The token expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @param joinChannelPrivilegeExpire The join channel privilege expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @param pubAudioPrivilegeExpire The publish audio privilege expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @param pubVideoPrivilegeExpire The publish video privilege expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @param pubDataStreamPrivilegeExpire The publish data stream privilege expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @return The RTC token, or an empty string if an error occurs.
      */
     public String buildTokenWithUid(String appId, String appCertificate, String channelName, int uid, int tokenExpire, int joinChannelPrivilegeExpire,
             int pubAudioPrivilegeExpire, int pubVideoPrivilegeExpire, int pubDataStreamPrivilegeExpire) {
@@ -139,7 +137,7 @@ public class RtcTokenBuilder2 {
     }
 
     /**
-     * Generates an RTC token with the specified privilege.
+     * Generates an RTC token with specified privileges.
      * <p>
      * This method supports generating a token with the following privileges:
      * - Joining an RTC channel.
@@ -147,41 +145,33 @@ public class RtcTokenBuilder2 {
      * - Publishing video in an RTC channel.
      * - Publishing data streams in an RTC channel.
      * <p>
-     * The privileges for publishing audio, video, and data streams in an RTC channel apply only if you have
-     * enabled co-host authentication.
+     * The privileges for publishing audio, video, and data streams apply only if co-host authentication is enabled.
+     * A user can have multiple privileges, each valid for up to 24 hours. The SDK triggers onTokenPrivilegeWillExpire
+     * and onRequestToken callbacks when the token is about to expire or has expired. Maintain privilege timestamps
+     * in your app logic, as callbacks do not specify the affected privilege. Generate a new token and call renewToken
+     * or joinChannel to continue.
      * <p>
-     * A user can have multiple privileges. Each privilege is valid for a maximum of 24 hours.
-     * The SDK triggers the onTokenPrivilegeWillExpire and onRequestToken callbacks when the token is about to expire
-     * or has expired. The callbacks do not report the specific privilege affected, and you need to maintain
-     * the respective timestamp for each privilege in your app logic. After receiving the callback, you need
-     * to generate a new token, and then call renewToken to pass the new token to the SDK, or call joinChannel to re-join
-     * the channel.
+     * Ensure privilege timestamps are set reasonably. For example, if the join channel privilege expires before
+     * the publish audio privilege, the user is kicked off the channel and cannot publish audio, even if the audio
+     * privilege is still valid.
      *
-     * @note Agora recommends setting a reasonable timestamp for each privilege according to your scenario.
-     * Suppose the expiration timestamp for joining the channel is set earlier than that for publishing audio.
-     * When the token for joining the channel expires, the user is immediately kicked off the RTC channel
-     * and cannot publish any audio stream, even though the timestamp for publishing audio has not expired.
-     *
-     * @param appId                        The App ID of your Agora project.
-     * @param appCertificate               The App Certificate of your Agora project.
-     * @param channelName                  The unique channel name for the Agora RTC session in string format. The string length must be less than 64 bytes. The channel name may contain the following characters:
-     *                                     - All lowercase English letters: a to z.
-     *                                     - All uppercase English letters: A to Z.
-     *                                     - All numeric characters: 0 to 9.
-     *                                     - The space character.
-     *                                     - "!", "#", "$", "%", "&", "(", ")", "+", "-", ":", ";", "<", "=", ".", ">", "?", "@", "[", "]", "^", "_", " {", "}", "|", "~", ",".
-     * @param account                      The user account.
-     * @param tokenExpire                  represented by the number of seconds elapsed since now. If, for example, you want to access the
-     *                                     Agora Service within 10 minutes after the token is generated, set tokenExpire as 600(seconds).
-     * @param joinChannelPrivilegeExpire   represented by the number of seconds elapsed since now.
-     *                                     If, for example, you want to join channel and expect stay in the channel for 10 minutes, set joinChannelPrivilegeExpire as 600(seconds).
-     * @param pubAudioPrivilegeExpire      represented by the number of seconds elapsed since now.
-     *                                     If, for example, you want to enable publish audio privilege for 10 minutes, set pubAudioPrivilegeExpire as 600(seconds).
-     * @param pubVideoPrivilegeExpire      represented by the number of seconds elapsed since now.
-     *                                     If, for example, you want to enable publish video privilege for 10 minutes, set pubVideoPrivilegeExpire as 600(seconds).
-     * @param pubDataStreamPrivilegeExpire represented by the number of seconds elapsed since now.
-     *                                     If, for example, you want to enable publish data stream privilege for 10 minutes, set pubDataStreamPrivilegeExpire as 600(seconds).
-     * @return The RTC token.
+     * @param appId The App ID of your Agora project.
+     * @param appCertificate The App Certificate of your Agora project.
+     * @param channelName The unique channel name for the Agora RTC session in string format. The string length must be less than 64 bytes. Supported characters include:
+     *                    <ul>
+     *                    <li>All lowercase English letters: a to z.</li>
+     *                    <li>All uppercase English letters: A to Z.</li>
+     *                    <li>All numeric characters: 0 to 9.</li>
+     *                    <li>The space character.</li>
+     *                    <li>!, #, $, %, &amp;, (, ), +, -, :, ;, &lt;, =, ., &gt;, ?, @, [, ], ^, _, {, }, |, ~, ,</li>
+     *                    </ul>
+     * @param account The user account, max length 255 bytes.
+     * @param tokenExpire The token expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @param joinChannelPrivilegeExpire The join channel privilege expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @param pubAudioPrivilegeExpire The publish audio privilege expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @param pubVideoPrivilegeExpire The publish video privilege expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @param pubDataStreamPrivilegeExpire The publish data stream privilege expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @return The RTC token, or an empty string if an error occurs.
      */
     public String buildTokenWithUserAccount(String appId, String appCertificate, String channelName, String account, int tokenExpire,
             int joinChannelPrivilegeExpire, int pubAudioPrivilegeExpire, int pubVideoPrivilegeExpire, int pubDataStreamPrivilegeExpire) {
@@ -203,22 +193,17 @@ public class RtcTokenBuilder2 {
     }
 
     /**
-     * Build the RTC and RTM token with account.
+     * Builds an RTC and RTM token using a user account.
      *
-     * @param appId:            The App ID issued to you by Agora. Apply for a new App ID from
-     *                          Agora Dashboard if it is missing from your kit. See Get an App ID.
-     * @param appCertificate:   Certificate of the application that you registered in
-     *                          the Agora Dashboard. See Get an App Certificate.
-     * @param channelName:      Unique channel name for the AgoraRTC session in the string format
-     * @param account:          The user's account, max length is 255 Bytes.
-     * @param role:             ROLE_PUBLISHER: A broadcaster/host in a live-broadcast profile.
-     *                          ROLE_SUBSCRIBER: An audience(default) in a live-broadcast profile.
-     * @param tokenExpire:      represented by the number of seconds elapsed since now. If, for example,
-     *                          you want to access the Agora Service within 10 minutes after the token is generated,
-     *                          set tokenExpire as 600(seconds).
-     * @param privilegeExpire:  represented by the number of seconds elapsed since now. If, for example,
-     *                          you want to enable your privilege for 10 minutes, set privilegeExpire as 600(seconds).
-     * @return The RTC and RTM token.
+     * @param appId The App ID issued by Agora. Apply for a new App ID from the Agora Dashboard if missing.
+     * @param appCertificate Certificate of the application registered in the Agora Dashboard.
+     * @param channelName Unique channel name for the Agora RTC session in string format.
+     * @param account The user account, max length 255 bytes.
+     * @param role ROLE_PUBLISHER: A broadcaster/host in a live-broadcast profile.
+     *             ROLE_SUBSCRIBER: An audience (default) in a live-broadcast profile.
+     * @param tokenExpire The token expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @param privilegeExpire The privilege expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @return The RTC and RTM token, or an empty string if an error occurs.
      */
     public String buildTokenWithRtm(String appId, String appCertificate, String channelName, String account, Role role, int tokenExpire, int privilegeExpire) {
         AccessToken2 accessToken = new AccessToken2(appId, appCertificate, tokenExpire);
@@ -246,32 +231,22 @@ public class RtcTokenBuilder2 {
     }
 
     /**
-     * Build the RTC and RTM token with account.
+     * Builds an RTC and RTM token with separate accounts and privileges.
      *
-     * @param appId:                       The App ID issued to you by Agora. Apply for a new App ID from
-     *                                     Agora Dashboard if it is missing from your kit. See Get an App ID.
-     * @param appCertificate:              Certificate of the application that you registered in
-     *                                     the Agora Dashboard. See Get an App Certificate.
-     * @param channelName:                 Unique channel name for the AgoraRTC session in the string format
-     * @param rtcAccount:                  The RTC user's account, max length is 255 Bytes.
-     * @param rtcRole:                     ROLE_PUBLISHER: A broadcaster/host in a live-broadcast profile.
-     *                                     ROLE_SUBSCRIBER: An audience(default) in a live-broadcast profile.
-     * @param rtcTokenExpire:              represented by the number of seconds elapsed since now. If, for example,
-     *                                     you want to access the Agora Service within 10 minutes after the token is generated,
-     *                                     set rtcTokenExpire as 600(seconds).
-     * @param joinChannelPrivilegeExpire   represented by the number of seconds elapsed since now.
-     *                                     If, for example, you want to join channel and expect stay in the channel for 10 minutes, set joinChannelPrivilegeExpire as 600(seconds).
-     * @param pubAudioPrivilegeExpire      represented by the number of seconds elapsed since now.
-     *                                     If, for example, you want to enable publish audio privilege for 10 minutes, set pubAudioPrivilegeExpire as 600(seconds).
-     * @param pubVideoPrivilegeExpire      represented by the number of seconds elapsed since now.
-     *                                     If, for example, you want to enable publish video privilege for 10 minutes, set pubVideoPrivilegeExpire as 600(seconds).
-     * @param pubDataStreamPrivilegeExpire represented by the number of seconds elapsed since now.
-     *                                     If, for example, you want to enable publish data stream privilege for 10 minutes, set pubDataStreamPrivilegeExpire as 600(seconds).
-     * @param rtmUserId:                   The RTM user's account, max length is 64 Bytes.
-     * @param rtmTokenExpire:              represented by the number of seconds elapsed since now. If, for example,
-     *                                     you want to access the Agora Service within 10 minutes after the token is generated,
-     *                                     set rtmTokenExpire as 600(seconds).
-     * @return The RTC and RTM token.
+     * @param appId The App ID issued by Agora. Apply for a new App ID from the Agora Dashboard if missing.
+     * @param appCertificate Certificate of the application registered in the Agora Dashboard.
+     * @param channelName Unique channel name for the Agora RTC session in string format.
+     * @param rtcAccount The RTC user account, max length 255 bytes.
+     * @param rtcRole ROLE_PUBLISHER: A broadcaster/host in a live-broadcast profile.
+     *                ROLE_SUBSCRIBER: An audience (default) in a live-broadcast profile.
+     * @param rtcTokenExpire The RTC token expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @param joinChannelPrivilegeExpire The join channel privilege expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @param pubAudioPrivilegeExpire The publish audio privilege expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @param pubVideoPrivilegeExpire The publish video privilege expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @param pubDataStreamPrivilegeExpire The publish data stream privilege expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @param rtmUserId The RTM user account, max length 64 bytes.
+     * @param rtmTokenExpire The RTM token expiration time, in seconds since now (e.g., 600 for 10 minutes).
+     * @return The RTC and RTM token, or an empty string if an error occurs.
      */
     public String buildTokenWithRtm2(String appId, String appCertificate, String channelName, String rtcAccount, Role rtcRole, int rtcTokenExpire,
             int joinChannelPrivilegeExpire, int pubAudioPrivilegeExpire, int pubVideoPrivilegeExpire, int pubDataStreamPrivilegeExpire, String rtmUserId,

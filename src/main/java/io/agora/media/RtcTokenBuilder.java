@@ -1,23 +1,27 @@
 package io.agora.media;
 
+/**
+ * Builds RTC tokens for Agora RTC sessions using either a user ID (UID) or a user account.
+ * This class generates tokens required for authentication in Agora's real-time communication services.
+ */
 public class RtcTokenBuilder {
-	public enum Role {
+    public enum Role {
         /**
          * DEPRECATED. Role_Attendee has the same privileges as Role_Publisher.
          */
         Role_Attendee(0),
         /**
-         *    RECOMMENDED. Use this role for a voice/video call or a live broadcast, if your scenario does not require authentication for [Co-host](https://docs.agora.io/en/video-calling/get-started/authentication-workflow?#co-host-token-authentication).
+         * RECOMMENDED. Use this role for a voice/video call or a live broadcast, if your scenario does not require authentication for co-hosts.
          */
         Role_Publisher(1),
         /**
-         * Only use this role if your scenario require authentication for [Co-host](https://docs.agora.io/en/video-calling/get-started/authentication-workflow?#co-host-token-authentication).
-         *
-         * @note In order for this role to take effect, please contact our support team to enable authentication for Co-host for you. Otherwise, Role_Subscriber still has the same privileges as Role_Publisher.
+         * Only use this role if your scenario requires authentication for co-hosts.
+         * 
+         * @see <a href="https://docs.agora.io/en/video-calling/get-started/authentication-workflow?#co-host-token-authentication">Agora Co-host Token Authentication</a>
          */
         Role_Subscriber(2),
         /**
-         * DEPRECATED. Role_Attendee has the same privileges as Role_Publisher.
+         * DEPRECATED. Role_Admin has the same privileges as Role_Publisher.
          */
         Role_Admin(101);
 
@@ -29,80 +33,73 @@ public class RtcTokenBuilder {
     }
 
     /**
-     * Builds an RTC token using an int uid.
+     * Builds an RTC token using an integer UID.
      *
-     * @param appId The App ID issued to you by Agora.
-     * @param appCertificate Certificate of the application that you registered in
-     *        the Agora Dashboard.
-     * @param channelName The unique channel name for the AgoraRTC session in the string format. The string length must be less than 64 bytes. Supported character scopes are:
+     * @param appId The App ID issued by Agora.
+     * @param appCertificate Certificate of the application registered in the Agora Dashboard.
+     * @param channelName The unique channel name for the Agora RTC session in string format. The string length must be less than 64 bytes. Supported characters include:
      * <ul>
-     *    <li> The 26 lowercase English letters: a to z.</li>
-     *    <li> The 26 uppercase English letters: A to Z.</li>
-     *    <li> The 10 digits: 0 to 9.</li>
-     *    <li> The space.</li>
-     *    <li> "!", "#", "$", "%", "&", "(", ")", "+", "-", ":", ";", "<", "=", ".", ">", "?", "@", "[", "]", "^", "_", " {", "}", "|", "~", ",".
+     *    <li>The 26 lowercase English letters: a to z.</li>
+     *    <li>The 26 uppercase English letters: A to Z.</li>
+     *    <li>The 10 digits: 0 to 9.</li>
+     *    <li>The space.</li>
+     *    <li>!, #, $, %, &amp;, (, ), +, -, :, ;, &lt;, =, ., &gt;, ?, @, [, ], ^, _, {, }, |, ~, ,</li>
      * </ul>
-     * @param uid  User ID. A 32-bit unsigned integer with a value ranging from
-     *        1 to (2^32-1).
+     * @param uid User ID. A 32-bit unsigned integer ranging from 1 to (2^32-1). Use 0 for dynamic UID assignment.
      * @param role The user role.
      * <ul>
-     *     <li> Role_Publisher = 1: RECOMMENDED. Use this role for a voice/video call or a live broadcast.</li>
-     *     <li> Role_Subscriber = 2: ONLY use this role if your live-broadcast scenario requires authentication for [Co-host](https://docs.agora.io/en/video-calling/get-started/authentication-workflow?#co-host-token-authentication). In order for this role to take effect, please contact our support team to enable authentication for Co-host for you. Otherwise, Role_Subscriber still has the same privileges as Role_Publisher.</li>
+     *     <li>Role_Publisher = 1: Recommended for voice/video calls or live broadcasts.</li>
+     *     <li>Role_Subscriber = 2: Use for live broadcasts requiring co-host authentication. Contact Agora support to enable this feature.</li>
      * </ul>
-     * @param privilegeTs Represented by the number of seconds elapsed since 1/1/1970.
-     *        If, for example, you want to access the Agora Service within 10 minutes
-     *        after the token is generated, set expireTimestamp as the current time stamp
-     *        + 600 (seconds).
+     * @param privilegeTs The privilege expiration timestamp, in seconds since 1/1/1970. For example, to allow access for 10 minutes, set this to the current timestamp plus 600 seconds.
+     * @return The generated RTC token, or an empty string if an error occurs.
      */
     public String buildTokenWithUid(String appId, String appCertificate,
-    		String channelName, int uid, Role role, int privilegeTs) {
-    	String account = uid == 0 ? "" : String.valueOf(uid);
-    	return buildTokenWithUserAccount(appId, appCertificate, channelName,
-    			account, role, privilegeTs);
+            String channelName, int uid, Role role, int privilegeTs) {
+        String account = uid == 0 ? "" : String.valueOf(uid);
+        return buildTokenWithUserAccount(appId, appCertificate, channelName,
+                account, role, privilegeTs);
     }
 
     /**
-     * Builds an RTC token using a string userAccount.
+     * Builds an RTC token using a string user account.
      *
-     * @param appId The App ID issued to you by Agora.
-     * @param appCertificate Certificate of the application that you registered in
-     *        the Agora Dashboard.
-     * @param channelName The unique channel name for the AgoraRTC session in the string format. The string length must be less than 64 bytes. Supported character scopes are:
+     * @param appId The App ID issued by Agora.
+     * @param appCertificate Certificate of the application registered in the Agora Dashboard.
+     * @param channelName The unique channel name for the Agora RTC session in string format. The string length must be less than 64 bytes. Supported characters include:
      * <ul>
-     *    <li> The 26 lowercase English letters: a to z.</li>
-     *    <li> The 26 uppercase English letters: A to Z.</li>
-     *    <li> The 10 digits: 0 to 9.</li>
-     *    <li> The space.</li>
-     *    <li> "!", "#", "$", "%", "&", "(", ")", "+", "-", ":", ";", "<", "=", ".", ">", "?", "@", "[", "]", "^", "_", " {", "}", "|", "~", ",".
+     *    <li>The 26 lowercase English letters: a to z.</li>
+     *    <li>The 26 uppercase English letters: A to Z.</li>
+     *    <li>The 10 digits: 0 to 9.</li>
+     *    <li>The space.</li>
+     *    <li>!, #, $, %, &amp;, (, ), +, -, :, ;, &lt;, =, ., &gt;, ?, @, [, ], ^, _, {, }, |, ~, ,</li>
      * </ul>
-     * @param account  The user account.
+     * @param account The user account.
      * @param role The user role.
      * <ul>
-     *     <li> Role_Publisher = 1: RECOMMENDED. Use this role for a voice/video call or a live broadcast.</li>
-     *     <li> Role_Subscriber = 2: ONLY use this role if your live-broadcast scenario requires authentication for [Co-host](https://docs.agora.io/en/video-calling/get-started/authentication-workflow?#co-host-token-authentication). In order for this role to take effect, please contact our support team to enable authentication for Co-host for you. Otherwise, Role_Subscriber still has the same privileges as Role_Publisher.</li>
+     *     <li>Role_Publisher = 1: Recommended for voice/video calls or live broadcasts.</li>
+     *     <li>Role_Subscriber = 2: Use for live broadcasts requiring co-host authentication. Contact Agora support to enable this feature.</li>
      * </ul>
-     * @param privilegeTs represented by the number of seconds elapsed since 1/1/1970.
-     *        If, for example, you want to access the Agora Service within 10 minutes
-     *        after the token is generated, set expireTimestamp as the current time stamp
-     *        + 600 (seconds).
+     * @param privilegeTs The privilege expiration timestamp, in seconds since 1/1/1970. For example, to allow access for 10 minutes, set this to the current timestamp plus 600 seconds.
+     * @return The generated RTC token, or an empty string if an error occurs.
      */
     public String buildTokenWithUserAccount(String appId, String appCertificate,
-    		String channelName, String account, Role role, int privilegeTs) {
+            String channelName, String account, Role role, int privilegeTs) {
 
-    	// Assign appropriate access privileges to each role.
-    	AccessToken builder = new AccessToken(appId, appCertificate, channelName, account);
-    	builder.addPrivilege(AccessToken.Privileges.kJoinChannel, privilegeTs);
-    	if (role == Role.Role_Publisher || role == Role.Role_Subscriber || role == Role.Role_Admin) {
-    		builder.addPrivilege(AccessToken.Privileges.kPublishAudioStream, privilegeTs);
-    		builder.addPrivilege(AccessToken.Privileges.kPublishVideoStream, privilegeTs);
-    		builder.addPrivilege(AccessToken.Privileges.kPublishDataStream, privilegeTs);
-    	}
+        // Assign appropriate access privileges to each role.
+        AccessToken builder = new AccessToken(appId, appCertificate, channelName, account);
+        builder.addPrivilege(AccessToken.Privileges.kJoinChannel, privilegeTs);
+        if (role == Role.Role_Publisher || role == Role.Role_Subscriber || role == Role.Role_Admin) {
+            builder.addPrivilege(AccessToken.Privileges.kPublishAudioStream, privilegeTs);
+            builder.addPrivilege(AccessToken.Privileges.kPublishVideoStream, privilegeTs);
+            builder.addPrivilege(AccessToken.Privileges.kPublishDataStream, privilegeTs);
+        }
 
-    	try {
-			return builder.build();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return "";
-		}
+        try {
+            return builder.build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 }

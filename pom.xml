@@ -9,13 +9,28 @@
     <packaging>jar</packaging>
     <name>Agora Token Generator</name>
     <description>A library for generating Agora RTC tokens</description>
+    <url>https://github.com/Shaurya2712/agora-token-generator</url>
 
     <properties>
-        <java.version>11</java.version>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <java.version>1.8</java.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <scm>
+        <connection>scm:git:git://github.com/Shaurya2712/agora-token-generator.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/Shaurya2712/agora-token-generator.git</developerConnection>
+        <url>https://github.com/Shaurya2712/agora-token-generator</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>shaurya2712</id>
+            <name>Shaurya</name>
+            <email>shaurya@example.com</email>
+        </developer>
+    </developers>
 
     <dependencies>
         <!-- Spring Boot Starter (for compatibility with Spring Boot projects) -->
@@ -49,7 +64,6 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
-                    <release>11</release>
                     <compilerArgs>
                         <arg>-Xlint:unchecked</arg>
                     </compilerArgs>
@@ -63,7 +77,7 @@
                     <execution>
                         <id>attach-sources</id>
                         <goals>
-                            <goal>jar</goal>
+                            <goal>jar-no-fork</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -72,6 +86,13 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.2.0</version>
+                <configuration>
+                    <failOnError>false</failOnError>
+                    <failOnWarnings>false</failOnWarnings>
+                    <additionalOptions>
+                        <additionalOption>-Xdoclint:none</additionalOption>
+                    </additionalOptions>
+                </configuration>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -90,5 +111,10 @@
             <name>GitHub Packages</name>
             <url>https://maven.pkg.github.com/Shaurya2712/agora-token-generator</url>
         </repository>
+        <snapshotRepository>
+            <id>github</id>
+            <name>GitHub Packages Snapshots</name>
+            <url>https://maven.pkg.github.com/Shaurya2712/agora-token-generator</url>
+        </snapshotRepository>
     </distributionManagement>
 </project>
